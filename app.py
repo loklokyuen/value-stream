@@ -3,6 +3,7 @@ import json
 import re
 import requests
 import streamlit as st
+from db import load_trending_products, sync_shopify_to_db
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -128,15 +129,18 @@ st.title("🛍️ AI Merchandising Dashboard")
 
 # LOAD DATA
 with st.spinner("Running AI merchandising engine..."):
+    trending = load_trending_products()
+    trending_titles = [row["title"].lower() for row in trending] 
+    shopify_products = get_shopify_products()
+    sync_shopify_to_db(shopify_products)
 
-    amazon = load_amazon_data()
-    shopify = get_shopify_products()
-
-    trending = [x["title"].lower() for x in amazon]
+    # amazon = load_amazon_data()
+    # shopify = get_shopify_products()
+    # trending = [x["title"].lower() for x in amazon]
 
     processed = []
 
-    for product in shopify:
+    for product in shopify_products:
 
         variant = product["variants"][0]
 
@@ -149,7 +153,7 @@ with st.spinner("Running AI merchandising engine..."):
         title = product["title"]
 
         # RAG MATCH
-        score, match = rag_similarity(title, trending)
+        score, match = rag_similarity(title, trending_titles)
         is_trending = score >= 2
 
         # INVENTORY LOGIC
@@ -275,5 +279,5 @@ for item in processed:
 # TREND SECTION
 st.subheader("🔥 Trending Market Items")
 
-for item in amazon[:15]:
+for item in trending[:15]:
     st.write("•", item["title"])

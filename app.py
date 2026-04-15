@@ -20,9 +20,9 @@ HEADERS = {
     "Content-Type": "application/json"
 }
 
-# =========================
+
 # DATA
-# =========================
+
 def load_amazon_data(path="beauty_best_sellers.json"):
     with open(path, "r") as f:
         return json.load(f)
@@ -34,9 +34,9 @@ def get_shopify_products():
     return r.json().get("products", [])
 
 
-# =========================
+
 # SHOPIFY ACTIONS
-# =========================
+
 def update_variant_price(variant_id, new_price, original_price):
     url = f"https://{SHOPIFY_STORE}/admin/api/{API_VERSION}/variants/{variant_id}.json"
 
@@ -119,11 +119,11 @@ Price: {product['variants'][0]['price']}
         return str(e)
 
 
-# =========================
+
 # STREAMLIT UI
-# =========================
+
 st.set_page_config(layout="wide")
-st.title("🛍️ AI Merchandising Dashboard (Smart RAG Edition)")
+st.title("🛍️ AI Merchandising Dashboard")
 
 
 # LOAD DATA
@@ -212,9 +212,9 @@ for item in processed:
 
     action = item["action"]
 
-    # =========================
+  
     # BADGES
-    # =========================
+    
     if action == "RESTOCK":
         badge = "🟢 RESTOCK"
     elif action == "DISCOUNT_SUGGESTED":

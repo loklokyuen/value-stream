@@ -8,7 +8,7 @@ Required environment variables:
     DB_PASSWORD
 
 Cloud Run:  connects via Unix socket (detected automatically via K_SERVICE).
-Local dev:  connects via the public IP in DB_HOST (defaults to 35.197.244.49).
+Local dev:  connects via the public IP in DB_HOST.
 """
 
 import os
@@ -21,7 +21,7 @@ load_dotenv(override=True)
 DB_NAME = os.getenv("DB_NAME", "")
 DB_USER = os.getenv("DB_USER", "")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "")
-DB_HOST = os.getenv("DB_HOST", "35.197.244.49")
+DB_HOST = os.getenv("DB_HOST", "")
 
 def get_conn():
     if os.getenv("K_SERVICE"):  # running in Cloud Run
@@ -50,7 +50,7 @@ def get_engine():
         pool_pre_ping=True,
     )
 
-
+# @st.cache_data(ttl=300) 
 def load_trending_products():
     """
     Return the latest bestseller rankings from the v_product_trend_analysis view.
@@ -59,8 +59,9 @@ def load_trending_products():
     """
     with get_engine().connect() as conn:
         rows = conn.execute(sqlalchemy.text("""
-            SELECT asin, title, current_rank, daily_change, rank_yesterday, rank_2_days_ago, rank_3_days_ago
+            SELECT asin, title, current_rank, daily_change, rank_yesterday, rank_2_days_ago, rank_3_days_ago, scraped_at
             FROM   v_product_trend_analysis
+            WHERE  scraped_at >= NOW() - INTERVAL '2 days'
             ORDER  BY current_rank
         """))
         return [dict(row._mapping) for row in rows]
@@ -134,4 +135,12 @@ def sync_shopify_to_db(products: list[dict]):
                 variant_id         = EXCLUDED.variant_id,
                 image_src          = EXCLUDED.image_src,
                 updated_at         = NOW()
+            WHERE (
+                products.title              IS DISTINCT FROM EXCLUDED.title              OR
+                products.price              IS DISTINCT FROM EXCLUDED.price              OR
+                products.compare_at_price   IS DISTINCT FROM EXCLUDED.compare_at_price  OR
+                products.inventory_quantity IS DISTINCT FROM EXCLUDED.inventory_quantity OR
+                products.image_src          IS DISTINCT FROM EXCLUDED.image_src          OR
+                products.tags               IS DISTINCT FROM EXCLUDED.tags
+            )
         """), rows)

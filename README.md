@@ -1,4 +1,4 @@
-# Value Stream — AI E-commerce Intelligence Tool
+# Value Stream
 
 Value Stream is an AI-powered decision-support dashboard for e-commerce teams. It combines Amazon bestseller trends, Shopify inventory data, and LLM-generated recommendations to help businesses identify product opportunities, respond to market signals, and make faster merchandising decisions.
 

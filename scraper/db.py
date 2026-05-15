@@ -24,6 +24,10 @@ def save_bestsellers(products: list[dict]):
             float(p["rating"]),
             p["url"]
         ))
+    cursor.execute("""
+        DELETE FROM amazon_bestsellers
+        WHERE scraped_at < NOW() - INTERVAL '4 days'
+    """)
     conn.commit()
     cursor.close()
     conn.close()

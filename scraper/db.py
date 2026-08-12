@@ -2,6 +2,10 @@ import psycopg2
 import os
 
 def get_conn():
+    database_url = os.getenv("DATABASE_URL")
+    if database_url:
+        return psycopg2.connect(database_url, sslmode="require")
+
     return psycopg2.connect(
         host=f"/cloudsql/{os.getenv('CLOUD_SQL_CONNECTION_NAME')}",
         database=os.getenv("DB_NAME"),

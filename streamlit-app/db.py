@@ -54,7 +54,7 @@ def get_engine():
         pool_pre_ping=True,
     )
 
-@st.cache_data(ttl=300) 
+@st.cache_data(ttl=300)
 def load_trending_products():
     """
     Return the latest bestseller rankings from the v_product_trend_analysis view.
